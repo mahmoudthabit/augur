@@ -1,0 +1,17 @@
+body{
+    background-color: #ececec;
+}
+
+
+button {
+    color: white;
+    background-color: #4285f4;
+    border-radius: 20px;
+    border: solid 1.5px #4285f4;
+    padding: 7px;
+    margin: 10px;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+}

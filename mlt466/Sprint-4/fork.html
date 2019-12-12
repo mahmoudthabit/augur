@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <link rel="stylesheet" type="text/css" href="bar.css">
+        <link rel="stylesheet" type="text/css" href="index.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+
+    </head>
+<body>
+
+    <ul>
+        <li><a href="index.html">Top Committers</a></li>
+        <li><a href="issue.html">Average Issue Time</a></li>
+        <li><a href="summary.html">Aggregate Summary</a></li>
+        <li><a href="" class="active">Fork Count</a></li>
+    </ul>
+
+
+
+<p>4. Select Fork Count<br></p>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(25152);">MHS</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(20);">Rails</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(21);">Comcast</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(22);">GraphQL</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(23);">Netflix</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(24);">Apache</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(25151);">Zephyr-RTOS</button>
+<button type="button" onclick="emptyList(); loadRepoGroupForkCount(25150);">CHAOSS Risk Working Group</button>
+<br>
+<select id="mySelect" size="10">
+</select>
+<button type="button" onclick="displayForks()" >Select</button>
+<br>
+
+
+<p id="demo"></p>
+<p id="demo1"></p>
+
+<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"> </script>
+
+
+<p id="demo"></p>
+<p id="demo1"></p>
+
+<script>
+var repo_group_id;
+var repo_id;
+function loadRepoId(num) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      getRepoId (this.responseText);
+    }
+  };
+  xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups/"+ num +"/repos", true);
+  xhttp.send();
+}
+
+function getRepoId (txt) {
+    var obj = JSON.parse(txt);
+    var out = '';
+
+    for (i = 0; i < obj.length; i++){
+        if (obj[i].commits_all_time > 0) {
+            out += obj[i].repo_id + "   " + obj[i].repo_name + "<br>";
+        }
+    }
+
+    document.getElementById("demo").innerHTML = out ;
+}
+
+function loadRepoGroupId() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      getRepoGroupId (this.responseText);
+    }
+  };
+  xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups", true);
+  xhttp.send();
+}
+
+
+function getRepoGroupId (txt) {
+    var obj = JSON.parse(txt);
+    var out = '';
+
+    for (i = 0; i < obj.length; i++){
+        out += obj[i].repo_group_id + "         "
+ + obj[i].rg_name + "<br>";
+    }
+
+    document.getElementById("demo").innerHTML = out;
+}
+
+
+
+
+function loadRepoGroupTopCommitters(num) {
+  var datapoints = [];
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      datapoints = getRepoGroupTopCommitters (this.responseText);
+      var chart = new CanvasJS.Chart("chartContainer", {
+    theme: "light1",
+    animationEnabled: true,
+    title:{
+        text: "Top Committers"
+    },
+    data: [
+    {
+        // Change type to "bar", "area", "spline", "column",etc.
+        type: "pie",
+        dataPoints: datapoints
+    }
+    ]
+    });
+      chart.render();
+    }
+  };
+  xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups/" + num + "/top-committers", true);
+  xhttp.send();
+}
+
+
+function getRepoGroupTopCommitters (txt) {
+    var obj = JSON.parse(txt);
+    //var out = '';
+    var datapoints = [];
+    var total = 0;
+
+    for (i = 0; i < obj.length; i++){
+        if (i < 5) {
+            //out += obj[i].email + "         " + obj[i].commits + "<br>";
+//	    datapoints.push({label: obj[i].email, y: obj[i].commits});
+        }else{
+            total += obj[i].commit;
+        }
+//        datapoints.push({label: "", y: total});
+        datapoints.push({label: obj[i].email, y: obj[i].commits});
+    }
+
+    //document.getElementById("demo").innerHTML = out;
+    return datapoints;
+}
+
+
+
+
+function loadRepoGroupPull(num) {
+  var datapoints = [];
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      datapoints = getRepoGroupPull (this.responseText);
+      var chart = new CanvasJS.Chart("chartContainer", {
+    theme: "light1",
+    animationEnabled: true,
+    title:{
+        text: "Average Issue Resolution Time"
+    },
+    data: [
+    {
+        // Change type to "bar", "area", "spline", "column",etc.
+        type: "spline",
+        dataPoints: datapoints
+    }
+    ]
+    });
+    chart.render();
+    }
+  };
+  xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups/" + num + "/pull-request-acceptance-rate", true);
+  xhttp.send();
+}
+
+
+function getRepoGroupPull (txt) {
+    var obj = JSON.parse(txt);
+    var datapoints = [];
+
+    for (i = 0; i < obj.length; i++){
+        if (i < obj.length) {
+        datapoints.push({label: obj[i].date, y: obj[i].rate});
+        }
+    }
+
+    return datapoints;
+}
+
+var forkObj;
+
+function loadRepoGroupForkCount(num) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            getRepoGroupForkCount (this.responseText);
+        }
+    };
+    xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups/" + num + "/fork-count", true);
+    xhttp.send();
+}
+
+function getRepoGroupForkCount(txt){
+
+    var obj = JSON.parse(txt);
+    forkObj = obj;
+    var out = '';
+
+    emptyList();
+
+    for (i = 0; i < obj.length; i++){
+        if (i <  obj.length) {
+//            out += obj[i].repo_id + "         " + obj[i].repo_name + "<br>";
+            addSelect(obj[i].repo_name);
+        }
+    }
+
+//    document.getElementById("demo").innerHTML = obj.length;
+}
+
+function addSelect(txt) {
+    var x = document.getElementById("mySelect");
+    var option = document.createElement("option");
+    option.text = txt;
+//    option.addEventListener("ondblclick",displayForks);
+    option.ondblclick = function(){displayForks()};
+    x.add(option);
+}
+
+function emptyList() {
+    var x = document.getElementById("mySelect");
+    while(x.length != 0){
+        x.remove(x.length-1);
+    }
+}
+
+function displayForks(){
+    var x = document.getElementById("mySelect");
+//    document.getElementById("demo1").innerHTML = forkObj[x.selectedIndex].forks;
+
+//    datapoints = getRepoGroupTopCommitters (forkObj[x.selectedIndex].forks);
+
+//	    datapoints.push({label: obj[i].date, y: obj[i].rate});
+    var datapoints = [];
+    datapoints.push({label: forkObj[x.selectedIndex].repo_name, y: forkObj[x.selectedIndex].forks});
+      var chart = new CanvasJS.Chart("chartContainer", {
+          theme: "light1",
+          animationEnabled: true,
+          title:{
+              text: "Repo Fork Count"
+          },
+          data: [
+              {
+                  // Change type to "bar", "area", "spline", "column",etc.
+                  type: "bar",
+                  dataPoints: datapoints
+              }
+          ]
+      });
+    chart.render();
+
+}
+//
+//function getRepoGroupForkCount(txt){
+//
+//    var obj = JSON.parse(txt);
+//    datapoints = [];
+//
+//    for (i = 0; i < obj.length; i++){
+//        if (i <  obj.length) {
+//	    datapoints.push({label: obj[i].repo_name, y: obj[i].forks});
+//        }
+//    }
+//    return datapoints;
+//}
+
+</script>
+
+</body>
+</html>
