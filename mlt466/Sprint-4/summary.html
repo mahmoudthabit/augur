@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <link rel="stylesheet" type="text/css" href="bar.css">
+        <link rel="stylesheet" type="text/css" href="index.css">
+
+      <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+
+
+      <style>
+          table, th, td {
+              border: 1px solid black;
+/*              border-collapse: collapse;*/
+              text-align: center;
+              background-color:#f3d250; ;
+          }
+          th, td {
+              padding: 15px;
+          }
+          th {
+              text-align: left;
+          }
+
+          table{
+              margin: auto;
+              margin-top: 30px;
+          }
+
+          #groups{
+              margin: auto;
+          }
+
+          button {
+              display:inline-block;
+              text-align: center;
+          }
+
+          .head{
+              width: 50%;
+          }
+
+
+        </style>
+
+    </head>
+<body>
+
+    <ul>
+        <li><a href="index.html">Top Committers</a></li>
+        <li><a href="issue.html">Average Issue Time</a></li>
+        <li><a href="" class="active">Aggregate Summary</a></li>
+        <li><a href="fork.html">Fork Count</a></li>
+    </ul>
+
+
+<p>3. Aggregate Summary<br></p>
+<div id="groups">
+<button type="button" onclick="loadRepoGroupSummary(25152);">MHS</button>
+<button type="button" onclick="loadRepoGroupSummary(20);">Rails</button>
+<button type="button" onclick="loadRepoGroupSummary(21);">Comcast</button>
+<button type="button" onclick="loadRepoGroupSummary(22);">GraphQL</button>
+<button type="button" onclick="loadRepoGroupSummary(23);">Netflix</button>
+<button type="button" onclick="loadRepoGroupSummary(24);">Apache</button>
+<button type="button" onclick="loadRepoGroupSummary(25151);">Zephyr-RTOS</button>
+<button type="button" onclick="loadRepoGroupSummary(25150);">CHAOSS Risk Working Group</button>
+</div>
+<br>
+
+
+<table style="width:80%">
+  <tr>
+    <td class="head">Watcher Count</td>
+    <td id="watcher_count"></td>
+  </tr>
+  <tr>
+    <td class="head">Stars Count</td>
+    <td id="stars_count"></td>
+  </tr>
+  <tr>
+    <td class="head">Fork Count</td>
+    <td id="fork_count"></td>
+  </tr>
+  <tr>
+    <td class="head">Merged Count</td>
+    <td id="merged_count"></td>
+  </tr><tr>
+    <td class="head">Committer Count</td>
+    <td id="committer_count"></td>
+  </tr>
+  <tr>
+    <td class="head">Commit Count</td>
+    <td id="commit_count"></td>
+  </tr>
+</table>
+
+
+<p id="demo"></p>
+<p id="demo1"></p>
+
+
+<script>
+
+
+function loadRepoGroupSummary(num) {
+  var xhttp = new XMLHttpRequest();
+  document.getElementById("demo").innerHTML = "Loading(" + num + ")...";
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      getRepoGroupSummary(this.responseText);
+      document.getElementById("demo").innerHTML = txt;
+    }
+
+  };
+  xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups/" + num + "/aggregate-summary", true);
+  xhttp.send();
+}
+
+
+function getRepoGroupSummary(txt){
+  var obj = JSON.parse(txt);
+
+  document.getElementById("demo").innerHTML = txt;
+
+  document.getElementById("watcher_count").innerHTML = obj[0].watcher_count;
+  document.getElementById("stars_count").innerHTML = obj[0].stars_count;
+  document.getElementById('fork_count').innerHTML = obj[0].fork_count;
+  document.getElementById("merged_count").innerHTML = obj[0].merged_count;
+  document.getElementById("committer_count").innerHTML = obj[0].committer_count;
+  document.getElementById("commit_count").innerHTML = obj[0].commit_count;
+}
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <link rel="stylesheet" type="text/css" href="bar.css">
+        <link rel="stylesheet" type="text/css" href="index.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+
+    </head>
+<body>
+
+    <ul>
+        <li><a href="index.html">Top Committers</a></li>
+        <li><a href="">Average Issue Time</a></li>
+        <li><a href="summary.html">Aggreget Summary</a></li>
+        <li><a href="fork.html">Fork Count</a></li>
+    </ul>
+
+
+
+<p>2. Get Average Issue Resolution Time<br></p>
+<button type="button" onclick="loadRepoGroupPull(25152)">MHS</button>
+<button type="button" onclick="loadRepoGroupPull(20)">Rails</button>
+<button type="button" onclick="loadRepoGroupPull(21)">Comcast</button>
+<button type="button" onclick="loadRepoGroupPull(22)">GraphQL</button>
+<button type="button" onclick="loadRepoGroupPull(23)">Netflix</button>
+<button type="button" onclick="loadRepoGroupPull(24)">Apache</button>
+<button type="button" onclick="loadRepoGroupPull(25151)">Zephyr-RTOS</button>
+<button type="button" onclick="loadRepoGroupPull(25150)">CHAOSS Risk Working Group</button>
+
+
+<div id="chartContainer" style="height: 550px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"> </script>
+
+
+<p id="demo"></p>
+<p id="demo1"></p>
+
+<script>
+
+
+function loadRepoGroupPull(num) {
+  var datapoints = [];
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      datapoints = getRepoGroupPull (this.responseText);
+      var chart = new CanvasJS.Chart("chartContainer", {
+    theme: "light1",
+    animationEnabled: true,
+    title:{
+        text: "Average Issue Resolution Time"
+    },
+    data: [
+    {
+        type: "bar",
+        dataPoints: datapoints
+    }
+    ]
+    });
+    chart.render();
+    }
+  };
+  // http://augur.osshealth.io:5000/api/unstable/repo-groups/24/issues-maintainer-response-duration
+  xhttp.open("GET", "http://augur.osshealth.io:5000/api/unstable/repo-groups/" + num + "/issues-maintainer-response-duration", true);
+  xhttp.send();
+}
+
+
+function getRepoGroupPull (txt) {
+    var obj = JSON.parse(txt);
+    var datapoints = [];
+
+    for (i = 0; i < obj.length; i++){
+        if (i < obj.length) {
+        datapoints.push({label: obj[i].repo_name, y: obj[i].average_days_comment});
+        }
+    }
+
+    return datapoints;
+}
+
+var forkObj;
+
+
+
+
+</script>
+
+</body>
+</html>
